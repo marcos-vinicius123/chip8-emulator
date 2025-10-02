@@ -1,7 +1,7 @@
 public class Cpu {
     int program_counter;
     int stack_pointer;
-    byte registers[] = new byte[16];
+    int registers[] = new int[16];
     char stack[] = new char[16];
 
     char i_register;
@@ -18,12 +18,12 @@ public class Cpu {
     public void step(Memory memory) {
         char opcode = get_opcode(memory);
         char nnn = (char)(opcode & 0x0FFF);
-        byte n = (byte)(opcode & 0x000F);
-        byte x = (byte)(opcode & 0x0F00);
-        byte y = (byte)(opcode & 0x00F0);
-        byte kk = (byte)(opcode & 0x00FF);
+        int n = (opcode & 0x000F);
+        int x = (opcode & 0x0F00) >> 8;
+        int y = (opcode & 0x00F0) >> 4;
+        int kk = (opcode & 0x00FF);
 
-        switch (opcode & 0xF000) {
+        switch ((opcode & 0xF000) >> 12) {
             case 0x0:
                 opcodes.op_00EE(this);
                 break;
@@ -58,8 +58,8 @@ public class Cpu {
 
             case 0x8:
                 switch (n) {
-                    case 0x1:
-                        opcodes.op_8xy1(this, x, y);
+                    case 0x0:
+                        opcodes.op_8xy0(this, x, y);
                         break;
                 }
 
