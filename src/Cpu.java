@@ -1,11 +1,13 @@
 public class Cpu {
-    private int program_counter;
-    private int stack_pointer;
-    private byte registers[] = new byte[16];
-    private char stack[] = new char[16];
+    int program_counter;
+    int stack_pointer;
+    byte registers[] = new byte[16];
+    char stack[] = new char[16];
 
-    private char i_register;
-    private byte delay_timer, sound_timer;
+    char i_register;
+    byte delay_timer, sound_timer;
+
+    Opcodes opcodes = new Opcodes();
 
     private char get_opcode(Memory memory) {
         int temp = program_counter;
@@ -16,28 +18,51 @@ public class Cpu {
     public void step(Memory memory) {
         char opcode = get_opcode(memory);
         char nnn = (char)(opcode & 0x0FFF);
-        char n = (char)(opcode & 0x000F);
-        char x = (char)(opcode & 0x0F00);
-        char y = (char)(opcode & 0x00F0);
+        byte n = (byte)(opcode & 0x000F);
+        byte x = (byte)(opcode & 0x0F00);
+        byte y = (byte)(opcode & 0x00F0);
+        byte kk = (byte)(opcode & 0x00FF);
 
         switch (opcode & 0xF000) {
             case 0x0:
+                opcodes.op_00EE(this);
                 break;
 
             case 0x1:
+                opcodes.op_1nnn(this, nnn);
                 break;
 
             case 0x2:
+                opcodes.op_2nnn(this, nnn);
                 break;
 
             case 0x3:
+                opcodes.op_3xkk(this, x, kk);
                 break;
 
             case 0x4:
+                opcodes.op_4xkk(this, x, kk);
+                break;
+
+            case 0x5:
+                opcodes.op_5xy0(this, x, y);
                 break;
 
             case 0x6:
+                opcodes.op_6xkk(this, x, kk);
                 break;
+
+            case 0x7:
+                opcodes.op_7xkk(this, x, kk);
+                break;
+
+            case 0x8:
+                switch (n) {
+                    case 0x1:
+                        opcodes.op_8xy1(this, x, y);
+                        break;
+                }
+
         }
     }
 }
