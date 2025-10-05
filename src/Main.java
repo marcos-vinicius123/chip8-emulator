@@ -2,9 +2,6 @@ import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        Memory memory = new Memory(1024 * 4);
-        Cpu cpu = new Cpu();
-
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
