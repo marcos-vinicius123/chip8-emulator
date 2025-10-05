@@ -93,4 +93,91 @@ public class Opcodes {
         cpu.registers[x] *= 2;
         cpu.registers[x] &= 0xff;
     }
+
+    //skips next instruction if Vx != Vy.
+    public void op_9xy0(Cpu cpu, int x, int y) {
+        cpu.program_counter += cpu.registers[x] != cpu.registers[y] ? 2 : 0;
+    }
+
+    //sets I = nnn;
+    public void op_Annn(Cpu cpu, int nnn) {
+        cpu.i_register = (char)nnn;
+    }
+
+    //jumps to location nnn + V0.
+    public void op_Bnnn(Cpu cpu, int nnn) {
+        cpu.program_counter = nnn + cpu.registers[0];
+        cpu.program_counter &= 0xffff;
+    }
+
+    //sets Vx = random byte AND kk.
+    public void op_Cxkk(Cpu cpu, int x, int kk) {
+        cpu.registers[x] = (int)(Math.random()*255) & kk;
+    }
+
+    //draws n-byte sprite at memory location I at (Vx, Vy), sets VF = collision.
+    public void op_Dxyn(Cpu cpu, int x, int y, int n) {
+
+    }
+
+    //skips next instruction if key with value of Vx is pressed.
+    public void op_Ex9E(Cpu cpu, int x) {
+
+    }
+
+    //skips next instruction if key with value of Vx is not pressed.
+     public void op_ExA1(Cpu cpu, int x) {
+
+     }
+
+    //sets Vx = delay timer.
+    public void op_Fx07(Cpu cpu, int x) {
+        cpu.registers[x] = cpu.delay_timer;
+    }
+
+    //waits for a key press, stores the value of the key in Vx.
+    public void op_Fx0A(Cpu cpu, int x) {
+
+    }
+
+    //sets delay timer = Vx.
+    public void op_Fx15(Cpu cpu, int x) {
+        cpu.delay_timer = cpu.registers[x];
+    }
+
+    //sets sound timer = Vx.
+    public void op_Fx18(Cpu cpu, int x) {
+        cpu.sound_timer = cpu.registers[x];
+    }
+
+    //sets I = I + Vx.
+    public void op_Fx1E(Cpu cpu, int x) {
+        cpu.i_register += cpu.registers[x];
+    }
+
+    //sets I = location of sprite for digit Vx.
+    public void op_Fx29(Cpu cpu, int x) {
+        cpu.i_register = (char)(x*5); //every sprite is 5 bytes high.
+    }
+
+    //stores BCD representation of Vx in memory locations I, I+1, and I+2.
+    public void op_Fx33(Cpu cpu, Memory memory, int x) {
+        memory.set_byte((int)cpu.i_register,  (byte)(cpu.registers[x]/100));
+        memory.set_byte((int)cpu.i_register+1,  (byte)(cpu.registers[x]/10-cpu.registers[x]%10));
+        memory.set_byte((int)cpu.i_register+2,  (byte)(cpu.registers[x]%10));
+    }
+
+    //stores registers V0 through Vx in memory starting at location I.
+    public void op_Fx55(Cpu cpu, Memory memory, int x) {
+        for (int i  = 0; i < x; i++) {
+            memory.set_byte((int)cpu.i_register+i, (byte)cpu.registers[i]);
+        }
+    }
+
+    //read registers V0 through Vx from memory starting at location I.
+    public void op_Fx65(Cpu cpu, Memory memory, int x) {
+        for (int i  = 0; i < x; i++) {
+            cpu.registers[i] = (int)memory.get_byte((int)cpu.i_register+i);
+        }
+    }
 }

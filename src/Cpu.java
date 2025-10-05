@@ -5,7 +5,7 @@ public class Cpu {
     char stack[] = new char[16];
 
     char i_register;
-    byte delay_timer, sound_timer;
+    int delay_timer, sound_timer;
 
     Opcodes opcodes = new Opcodes();
 
@@ -61,8 +61,119 @@ public class Cpu {
                     case 0x0:
                         opcodes.op_8xy0(this, x, y);
                         break;
+
+                    case 0x1:
+                        opcodes.op_8xy1(this, x, y);
+                        break;
+
+                    case 0x2:
+                        opcodes.op_8xy2(this, x, y);
+                        break;
+
+                    case 0x3:
+                        opcodes.op_8xy3(this, x, y);
+                        break;
+
+                    case 0x4:
+                        opcodes.op_8xy4(this, x, y);
+                        break;
+
+                    case 0x5:
+                        opcodes.op_8xy5(this, x, y);
+                        break;
+
+                    case 0x6:
+                        opcodes.op_8xy6(this, x, y);
+                        break;
+
+                    case 0x7:
+                        opcodes.op_8xy7(this, x, y);
+                        break;
+
+                    case 0xe:
+                        opcodes.op_8xyE(this, x, y);
+                        break;
+
+                    default:
+                        System.out.printf("error: unknown opcode %X%n.\n", (int)opcode);
+                        break;
                 }
 
+            case 0x9:
+                opcodes.op_9xy0(this, x, y);
+                break;
+
+            case 0xa:
+                opcodes.op_Annn(this, nnn);
+                break;
+
+            case 0xb:
+                opcodes.op_Bnnn(this, nnn);
+                break;
+
+            case 0xc:
+                opcodes.op_Cxkk(this, x, kk);
+                break;
+
+            case 0xd:
+                opcodes.op_Dxyn(this, x, y, n);
+                break;
+
+            case 0xe:
+                if (kk==0x9E) {
+                    opcodes.op_Ex9E(this, x);
+                } else if (kk==0xA1) {
+                    opcodes.op_ExA1(this, x);
+                } else {
+                    System.out.printf("error: unknown opcode %X%n.\n", (int)opcode);
+                }
+                break;
+
+            case 0xf:
+                switch (kk) {
+                    case 0x07:
+                        opcodes.op_Fx07(this, x);
+                        break;
+
+                    case 0x0A:
+                        opcodes.op_Fx0A(this, x);
+                        break;
+
+                    case 0x15:
+                        opcodes.op_Fx15(this, x);
+                        break;
+
+                    case 0x18:
+                        opcodes.op_Fx18(this, x);
+                        break;
+
+                    case 0x1E:
+                        opcodes.op_Fx1E(this, x);
+                        break;
+
+                    case 0x29:
+                        opcodes.op_Fx29(this, x);
+                        break;
+
+                    case 0x33:
+                        opcodes.op_Fx33(this, memory, x);
+                        break;
+
+                    case 0x55:
+                        opcodes.op_Fx55(this, memory, x);
+                        break;
+
+                    case 0x65:
+                        opcodes.op_Fx65(this, memory, x);
+                        break;
+
+                    default:
+                        System.out.printf("error: unknown opcode {opcode:X}.\n");
+                        break;
+                }
+            default:
+                System.out.printf("error: unknown opcode %X%n.\n", (int)opcode);
+                break;
         }
     }
 }
