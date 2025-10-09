@@ -1,17 +1,30 @@
 public class Opcodes {
 
+    public void op_00E0(Cpu cpu, int[][] grid) {
+        for (int y = 0; y < 32; y++) {
+            for (int x = 0; x < 64; x++) {
+                grid[y][x] = 0;
+            }
+        }
+        Debugger.log("0x%X: CLS", cpu.program_counter);
+    }
+
     //returns from a subroutine.
     public void op_00EE(Cpu cpu) {
         cpu.program_counter = cpu.stack[--cpu.stack_pointer];
     }
 
     //jumps to adress nnn.
-    public void op_1nnn(Cpu cpu, char nnn) { cpu.program_counter = nnn;}
+    public void op_1nnn(Cpu cpu, char nnn) {
+        cpu.program_counter = nnn;
+        Debugger.log("0x%X: JUMP %X", cpu.program_counter, (int)nnn);
+    }
 
     //calls subroutine at nnn.
     public void op_2nnn(Cpu cpu, char nnn) {
-        cpu.stack[cpu.stack_pointer++] = (char)cpu.program_counter;
+        cpu.stack[cpu.stack_pointer++] = (char)(cpu.program_counter);
         cpu.program_counter = nnn;
+        Debugger.log("CALL 0x%X%n", nnn);
     }
 
     //skips next instruction if Vx == kk.
@@ -32,6 +45,7 @@ public class Opcodes {
     //sets Vx = kk.
     public void op_6xkk(Cpu cpu, int x, int kk) {
         cpu.registers[x] = kk;
+        Debugger.log("0x%X: LD V%X, 0x%X", cpu.program_counter, x, kk);
     }
 
     //sets Vx = Vx + kk.
@@ -102,6 +116,7 @@ public class Opcodes {
     //sets I = nnn;
     public void op_Annn(Cpu cpu, int nnn) {
         cpu.i_register = (char)nnn;
+        Debugger.log("LD I, 0x%X", nnn);
     }
 
     //jumps to location nnn + V0.
@@ -113,11 +128,13 @@ public class Opcodes {
     //sets Vx = random byte AND kk.
     public void op_Cxkk(Cpu cpu, int x, int kk) {
         cpu.registers[x] = (int)(Math.random()*255) & kk;
+        Debugger.log("RND V%X, 0x%X", x, kk);
     }
 
     //draws n-byte sprite at memory location I at (Vx, Vy), sets VF = collision.
-    public void op_Dxyn(Cpu cpu, int x, int y, int n) {
-
+    public void op_Dxyn(Cpu cpu, Memory memory, int[][] grid, int x, int y, int n) {
+        cpu.registers[0xf] = draw_sprite(memory, grid, cpu.i_register, cpu.registers[x], cpu.registers[y], n);
+        Debugger.log("DXYN");
     }
 
     //skips next instruction if key with value of Vx is pressed.
@@ -179,5 +196,22 @@ public class Opcodes {
         for (int i  = 0; i < x; i++) {
             cpu.registers[i] = (int)memory.get_byte((int)cpu.i_register+i);
         }
+    }
+
+    private int draw_sprite(Memory memory, int[][] grid, int adress, int x, int y, int height) {
+        int colision = 0;
+        //System.out.printf("%X%n %X%n %X%n %X%n %X%n", memory.rom[0], memory.rom[1], memory.rom[2], memory.rom[3], memory.rom[4]);
+        for (int i = 0; i < height; i++) {
+            int line = memory.get_byte(adress+i);
+            //System.out.printf("%X%n", line);
+            for (int j = 0; j < 8; j++) {
+                int p_x = x + j;
+                int p_y = y + i;
+                int temp = grid[p_y][p_x];
+                grid[p_y][p_x] = ((line >> (7 - j)) & 1);
+                //colision = temp!=grid[p_y][p_x] ? 1 : 0;
+            }
+        }
+        return colision;
     }
 }

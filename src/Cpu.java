@@ -1,5 +1,5 @@
 public class Cpu {
-    int program_counter;
+    int program_counter = 0x200;
     int stack_pointer;
     int registers[] = new int[16];
     char stack[] = new char[16];
@@ -15,17 +15,33 @@ public class Cpu {
         return memory.get_short(temp);
     }
 
-    public void step(Memory memory) {
+    public void step(Memory memory, int[][] grid) {
         char opcode = get_opcode(memory);
         char nnn = (char)(opcode & 0x0FFF);
         int n = (opcode & 0x000F);
         int x = (opcode & 0x0F00) >> 8;
         int y = (opcode & 0x00F0) >> 4;
         int kk = (opcode & 0x00FF);
+        Debugger.log("0x%X: 0x%X", program_counter-2, opcode&0xffff);
+        //System.out.printf("adress: %X%n | %X%n, | %X%n\n", program_counter-2, (int)opcode, (int)memory.get_short(program_counter-2));
+        if (delay_timer > 0) {
+            delay_timer--;
+        }
+
+        if (sound_timer > 0) {
+            sound_timer--;
+        }
 
         switch ((opcode & 0xF000) >> 12) {
             case 0x0:
-                opcodes.op_00EE(this);
+                if (kk==0xE0) {
+                    opcodes.op_00E0(this, grid);
+                    System.out.println("cls");
+                } else if (kk==0xEE) {
+                    opcodes.op_00EE(this);
+                } else {
+                    System.out.printf("error: unknown opcode %X%n.\n", (int)opcode);
+                }
                 break;
 
             case 0x1:
@@ -116,7 +132,7 @@ public class Cpu {
                 break;
 
             case 0xd:
-                opcodes.op_Dxyn(this, x, y, n);
+                opcodes.op_Dxyn(this, memory, grid, x, y, n);
                 break;
 
             case 0xe:
@@ -168,7 +184,7 @@ public class Cpu {
                         break;
 
                     default:
-                        System.out.printf("error: unknown opcode {opcode:X}.\n");
+                        System.out.printf("error: unknown opcode %X%n.\n", (int)opcode);
                         break;
                 }
             default:

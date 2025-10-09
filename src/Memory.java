@@ -1,6 +1,6 @@
 public class Memory {
     private int size;
-    private byte rom[];
+    public byte rom[];
 
     public Memory(int size) {
         this.size = size;
@@ -13,11 +13,15 @@ public class Memory {
     }
 
     public char get_addr(int addr) {
-        return (char)(get_byte(addr+1) << 8+get_byte(addr));
+        int high = get_byte(addr+1) & 0xff;
+        int low = get_byte(addr) & 0xff;
+        return (char)((high << 8) | low);
     }
 
     public char get_short(int addr) {
-        return (char)(get_byte(addr)<<8 + get_byte(addr+1));
+        int high = get_byte(addr) & 0xff;
+        int low = get_byte(addr+1) & 0xff;
+        return (char)((high<<8) | low);
     }
 
     public void set_byte(int addr, byte value) {
